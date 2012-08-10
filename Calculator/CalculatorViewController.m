@@ -6,29 +6,64 @@
 //  Copyright (c) 2012年 xidian university. All rights reserved.
 //
 
-#import "CalculatorViewController.h"
+#import "CalculatorViewController.h"    
+#import "CalculatorBrain.h"
 
-@interface CalculatorViewController ()
-
+@interface CalculatorViewController()
+@property (nonatomic) BOOL 
+userIsInTheMiddleOfEnteringANumber;
+@property (nonatomic, strong) CalculatorBrain *brain;
 @end
 
 @implementation CalculatorViewController
 
-- (void)viewDidLoad
+@synthesize display = _display;
+@synthesize userIsInTheMiddleOfEnteringANumber = _userIsInTheMiddleOfEnteringANumber;
+@synthesize brain = _brain; 
+
+- (CalculatorBrain *)brain
 {
-    [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
+    if(!_brain) _brain = [[CalculatorBrain alloc] init];
+    return _brain;
 }
 
-- (void)viewDidUnload
-{
-    [super viewDidUnload];
-    // Release any retained subviews of the main view.
+- (IBAction)digitPressed:(UIButton *)sender {
+    NSString *digit = [sender currentTitle];
+    //NSLog(@"digit pressed = %@",digit);
+    if(self.userIsInTheMiddleOfEnteringANumber)
+    {
+         self.display.text = [self.display.text stringByAppendingString:digit];
+    }else {
+        self.display.text = digit;
+        self.userIsInTheMiddleOfEnteringANumber = YES;
+    }
+}
+- (IBAction)enterPressed {
+    [self.brain pushOperand:[self.display.text doubleValue]];
+    self.userIsInTheMiddleOfEnteringANumber = NO;
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    return (interfaceOrientation != UIInterfaceOrientationPortraitUpsideDown);
+- (IBAction)operationPressed:(UIButton *)sender {
+    if(self.userIsInTheMiddleOfEnteringANumber) [self enterPressed];
+    double result = [self.brain performOperation:sender.currentTitle];
+    NSString *resultString = [NSString stringWithFormat:@"%g",result];
+    self.display.text = resultString;
 }
-
+    
 @end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
